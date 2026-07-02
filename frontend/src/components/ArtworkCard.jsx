@@ -1,105 +1,123 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Eye, Heart, DollarSign } from 'lucide-react';
+import { Eye, Heart, DollarSign, Bookmark } from 'lucide-react';
 import API from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const ArtworkCard = ({ artwork }) => {
+const ArtworkCard = ({ artwork, index = 0 }) => {
   const { user } = useAuth();
   const [likesCount, setLikesCount] = useState(artwork.likesCount || 0);
-  const [isLiked, setIsLiked] = useState(() => {
-    // If the backend returned likes array or isLiked flag
-    return artwork.isLiked || false;
-  });
+  const [isLiked, setIsLiked] = useState(artwork.isLiked || false);
 
-  const handleLikeClick = async (e) => {
+  const handleLike = async (e) => {
     e.preventDefault();
-    if (!user) {
-      alert('Please sign in to like artworks.');
-      return;
-    }
+    if (!user) return;
     try {
       const res = await API.post(`/artworks/${artwork._id}/like`);
       setIsLiked(res.data.liked);
       setLikesCount(prev => res.data.liked ? prev + 1 : prev - 1);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
-  const firstImage = artwork.images[0] || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=500&q=80';
+  const img = artwork.images?.[0] || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500&q=80';
+  const artistName = artwork.artistProfile?.fullName || `@${artwork.artist?.username}`;
+  const avatarSrc  = artwork.artistProfile?.avatar  || `https://api.dicebear.com/7.x/initials/svg?seed=${artwork.artist?.username}`;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="group relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5"
+      transition={{ duration: 0.45, delay: index * 0.06, ease: [0.4, 0, 0.2, 1] }}
+      className="group relative break-inside-avoid"
     >
-      <Link to={`/artwork/${artwork._id}`} className="block overflow-hidden">
-        {/* Artwork Image */}
+      {/* ── image + hover layer ─────────────────────────── */}
+      <Link to={`/artwork/${artwork._id}`} className="block relative overflow-hidden rounded-2xl"
+        style={{ background: '#1a1a26', boxShadow: '0 4px 24px rgba(0,0,0,0.5)' }}>
+
         <img
-          src={firstImage}
+          src={img}
           alt={artwork.title}
           loading="lazy"
-          className="h-64 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          style={{ maxHeight: '480px', minHeight: '180px' }}
         />
 
-        {/* Info Overlay (visible on hover) */}
-        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <h3 className="font-display text-base font-semibold text-white truncate">{artwork.title}</h3>
-          
-          <div className="mt-2 flex items-center justify-between text-xs text-slate-300">
-            <span className="capitalize">{artwork.category}</span>
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" />
-                {artwork.views}
-              </span>
-              <span className="flex items-center gap-1">
-                <Heart className="h-3.5 w-3.5" />
-                {likesCount}
-              </span>
+        {/* For-sale badge — always visible */}
+        {artwork.isForSale && (
+          <div className="absolute top-3 left-3 z-10">
+            <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
+              style={{ background: 'rgba(245,158,11,0.18)', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.35)', backdropFilter: 'blur(8px)' }}>
+              <DollarSign className="h-3 w-3" />
+              ${artwork.price}
+            </span>
+          </div>
+        )}
+
+        {/* Hover overlay */}
+        <div className="absolute inset-0 flex flex-col justify-between p-4 opacity-0 group-hover:opacity-100 transition-all duration-350"
+          style={{ background: 'linear-gradient(to top, rgba(7,7,13,0.96) 35%, rgba(7,7,13,0.25) 100%)' }}>
+          {/* top-right actions */}
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={handleLike}
+              className="h-8 w-8 flex items-center justify-center rounded-full transition-all duration-200"
+              style={{
+                background: isLiked ? 'rgba(244,63,94,0.15)' : 'rgba(255,255,255,0.08)',
+                border: isLiked ? '1px solid rgba(244,63,94,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                color: isLiked ? '#f43f5e' : '#9d9dab',
+              }}
+              aria-label="Like"
+            >
+              <Heart className={`h-3.5 w-3.5 ${isLiked ? 'fill-current' : ''}`} />
+            </button>
+          </div>
+
+          {/* bottom info */}
+          <div>
+            <h3 className="font-display text-base font-semibold leading-snug mb-2" style={{ color: '#f5f0e8' }}>
+              {artwork.title}
+            </h3>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img src={avatarSrc} alt={artistName} className="h-5 w-5 rounded-full object-cover" style={{ background: '#333342' }} />
+                <span className="text-[11px] font-medium" style={{ color: '#9d9dab' }}>{artistName}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1 text-[10px]" style={{ color: '#5a5a70' }}>
+                  <Eye className="h-3 w-3" /> {artwork.views || 0}
+                </span>
+                <span className="flex items-center gap-1 text-[10px]" style={{ color: isLiked ? '#f43f5e' : '#5a5a70' }}>
+                  <Heart className={`h-3 w-3 ${isLiked ? 'fill-current' : ''}`} /> {likesCount}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </Link>
 
-      {/* Card Footer Details */}
-      <div className="flex items-center justify-between p-4 border-t border-slate-100 dark:border-white/5">
+      {/* ── card footer ────────────────────────────────── */}
+      <div className="flex items-center justify-between pt-3 px-1">
         <Link
-          to={`/artist/${artwork.artistProfile?.fullName ? artwork.artist?.username : artwork.artist?.username}`}
-          className="flex items-center gap-2 group/author"
+          to={`/artist/${artwork.artist?.username}`}
+          className="flex items-center gap-2 group/auth"
         >
-          <img
-            src={artwork.artistProfile?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80'}
-            alt="Artist Avatar"
-            className="h-6 w-6 rounded-full object-cover"
-          />
-          <span className="text-xs font-semibold text-slate-700 group-hover/author:text-brand-500 dark:text-slate-300 dark:group-hover/author:text-white">
-            {artwork.artistProfile?.fullName || `@${artwork.artist?.username}`}
+          <img src={avatarSrc} alt={artistName} className="h-6 w-6 rounded-full object-cover" style={{ background: '#333342' }} />
+          <span className="text-xs font-medium transition-colors" style={{ color: '#5a5a70' }}
+            onMouseEnter={e => e.currentTarget.style.color = '#f5f0e8'}
+            onMouseLeave={e => e.currentTarget.style.color = '#5a5a70'}
+          >
+            {artistName}
           </span>
         </Link>
 
-        <div className="flex items-center gap-2">
-          {artwork.isForSale && (
-            <span className="flex items-center text-[10px] font-bold text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full">
-              <DollarSign className="h-3 w-3" />
-              <span>${artwork.price}</span>
+        <div className="flex items-center gap-1.5">
+          {artwork.category && (
+            <span className="text-[9px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
+              style={{ background: 'rgba(255,255,255,0.05)', color: '#5a5a70' }}>
+              {artwork.category}
             </span>
           )}
-
-          <button
-            onClick={handleLikeClick}
-            className={`rounded-full p-1.5 transition-colors ${
-              isLiked
-                ? 'bg-brand-500/10 text-brand-500'
-                : 'bg-slate-100 text-slate-400 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:hover:bg-slate-700'
-            }`}
-          >
-            <Heart className={`h-4.5 w-4.5 ${isLiked ? 'fill-current' : ''}`} />
-          </button>
         </div>
       </div>
     </motion.div>
