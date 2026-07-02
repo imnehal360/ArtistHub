@@ -5,14 +5,14 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import API from '../services/api.js';
 import {
-  Search, Bell, Mail, Sun, Moon, Upload, Menu, X,
+  Search, Bell, Mail, Upload, Menu, X,
   LogOut, LayoutDashboard, User, Settings, Palette,
-  ChevronDown, Sparkles, Zap
+  ChevronDown
 } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated, isArtist, isAdmin } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark } = useTheme();
   const navigate  = useNavigate();
   const location  = useLocation();
 
@@ -186,16 +186,6 @@ const Navbar = () => {
 
           {/* ── RIGHT CONTROLS ─────────────────────────── */}
           <div className="flex items-center gap-2">
-
-            {/* Theme toggle */}
-            <button onClick={toggleTheme} title="Toggle theme"
-              className="p-2 rounded-lg transition-colors"
-              style={{ color: 'var(--text-3)' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#00d9ff'}
-              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
-            >
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
 
             {isAuthenticated ? (
               <>
