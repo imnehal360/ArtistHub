@@ -8,86 +8,108 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Rich dark obsidian palette
-        obsidian: {
-          50:  '#f2f2f3',
-          100: '#e0e0e3',
-          200: '#c4c4cb',
-          300: '#9d9dab',
-          400: '#76768a',
-          500: '#5a5a70',
-          600: '#46465a',
-          700: '#333342',
-          800: '#1c1c28',
-          900: '#0f0f17',
-          950: '#07070d',
+        // Deep cosmic midnight backgrounds
+        void: {
+          50:  '#f0f0ff',
+          100: '#e0dfff',
+          200: '#c3c1ff',
+          300: '#a09bff',
+          400: '#7e71ff',
+          500: '#6247ff',
+          600: '#4f26f5',
+          700: '#3f18e0',
+          800: '#2c0fb8',
+          900: '#1a0a8c',
+          950: '#050511',
         },
-        // Warm gold accent — classic, luxurious
-        gold: {
-          50:  '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
+        // Electric teal — the hero accent
+        teal: {
+          300: '#67e8f9',
+          400: '#22d3ee',
+          500: '#06b6d4',
+          glow: '#00d9ff',
         },
-        // Rose accent for artsy flair
-        rose: {
-          400: '#fb7185',
-          500: '#f43f5e',
-          600: '#e11d48',
+        // Hot coral — energy and passion
+        coral: {
+          400: '#ff6b8a',
+          500: '#ff4d6d',
+          600: '#e03055',
         },
-        // Indigo for UI elements
-        indigo: {
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
+        // Electric violet — creativity
+        violet: {
+          400: '#c084fc',
+          500: '#a855f7',
+          600: '#9333ea',
+          700: '#7c3aed',
         },
-        // Cream for text on dark
-        cream: '#f5f0e8',
+        // Warm pearl for text
+        pearl: {
+          50:  '#ffffff',
+          100: '#f0f0ff',
+          200: '#d8d8f0',
+          300: '#b0b0d0',
+          400: '#8080a8',
+          500: '#606080',
+        },
+        // Emerald highlight
+        emerald: {
+          400: '#34d399',
+          500: '#10b981',
+        },
       },
       fontFamily: {
-        sans: ['"Inter"', 'system-ui', 'sans-serif'],
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
+        sans:    ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', 'sans-serif'],
+        display: ['"Clash Display"', '"Syne"', '"Playfair Display"', 'Georgia', 'serif'],
+        accent:  ['"Syne"', '"Inter"', 'sans-serif'],
       },
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'noise': "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E\")",
+        'cosmic':       'radial-gradient(ellipse at 20% 50%, rgba(98,71,255,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(0,217,255,0.1) 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, rgba(255,77,109,0.08) 0%, transparent 50%)',
+        'card-shine':   'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 60%)',
+        'teal-glow':    'radial-gradient(circle, rgba(0,217,255,0.3) 0%, transparent 70%)',
+        'violet-glow':  'radial-gradient(circle, rgba(168,85,247,0.3) 0%, transparent 70%)',
+        'coral-glow':   'radial-gradient(circle, rgba(255,77,109,0.3) 0%, transparent 70%)',
       },
       boxShadow: {
-        'glow-gold': '0 0 40px rgba(245, 158, 11, 0.15), 0 0 80px rgba(245, 158, 11, 0.05)',
-        'glow-indigo': '0 0 40px rgba(99, 102, 241, 0.2), 0 0 80px rgba(99, 102, 241, 0.08)',
-        'card': '0 1px 3px rgba(0,0,0,0.5), 0 4px 24px rgba(0,0,0,0.4)',
-        'card-hover': '0 4px 12px rgba(0,0,0,0.6), 0 12px 48px rgba(0,0,0,0.5)',
-        'inner-gold': 'inset 0 1px 0 rgba(245, 158, 11, 0.15)',
+        'teal':   '0 0 40px rgba(0,217,255,0.2), 0 0 80px rgba(0,217,255,0.08)',
+        'violet': '0 0 40px rgba(168,85,247,0.25), 0 0 80px rgba(168,85,247,0.1)',
+        'coral':  '0 0 40px rgba(255,77,109,0.25), 0 0 80px rgba(255,77,109,0.1)',
+        'card':   '0 1px 0 rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.6)',
+        'card-hover': '0 1px 0 rgba(0,217,255,0.15), 0 16px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,217,255,0.15)',
+        'btn-teal': '0 4px 24px rgba(0,217,255,0.35), 0 0 0 1px rgba(0,217,255,0.3)',
+        'btn-coral': '0 4px 24px rgba(255,77,109,0.4)',
+        'inner': 'inset 0 1px 0 rgba(255,255,255,0.1)',
       },
       animation: {
-        'float': 'float 6s ease-in-out infinite',
-        'shimmer': 'shimmer 2s linear infinite',
-        'fade-up': 'fadeUp 0.6s ease-out forwards',
-        'glow-pulse': 'glowPulse 3s ease-in-out infinite',
+        'drift-slow':  'drift 20s ease-in-out infinite',
+        'drift-fast':  'drift 12s ease-in-out infinite reverse',
+        'pulse-teal':  'pulseTeal 4s ease-in-out infinite',
+        'float-card':  'floatCard 6s ease-in-out infinite',
+        'shimmer':     'shimmerAnim 1.8s ease infinite',
+        'gradient-x':  'gradientX 6s ease infinite',
+        'spin-slow':   'spin 20s linear infinite',
       },
       keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-12px)' },
+        drift: {
+          '0%,100%': { transform: 'translate(0,0) scale(1)' },
+          '33%':     { transform: 'translate(30px,-20px) scale(1.05)' },
+          '66%':     { transform: 'translate(-20px,15px) scale(0.97)' },
         },
-        fadeUp: {
-          '0%': { opacity: '0', transform: 'translateY(24px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+        pulseTeal: {
+          '0%,100%': { opacity: '0.5', transform: 'scale(1)' },
+          '50%':     { opacity: '1',   transform: 'scale(1.08)' },
         },
-        glowPulse: {
-          '0%, 100%': { opacity: '0.6' },
-          '50%': { opacity: '1' },
+        floatCard: {
+          '0%,100%': { transform: 'translateY(0px)' },
+          '50%':     { transform: 'translateY(-10px)' },
         },
-      },
-      borderRadius: {
-        '4xl': '2rem',
+        shimmerAnim: {
+          '0%':   { backgroundPosition: '200% 50%' },
+          '100%': { backgroundPosition: '-200% 50%' },
+        },
+        gradientX: {
+          '0%,100%': { backgroundPosition: '0% 50%' },
+          '50%':     { backgroundPosition: '100% 50%' },
+        },
       },
     },
   },
