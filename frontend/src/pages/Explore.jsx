@@ -11,9 +11,9 @@ const CATEGORIES = [
 ];
 
 const SORTS = [
-  { value: 'latest',      label: 'Latest' },
-  { value: 'trending',    label: 'Trending' },
-  { value: 'most-viewed', label: 'Most Viewed' },
+  { value: 'latest',      label: 'LATEST' },
+  { value: 'trending',    label: 'TRENDING' },
+  { value: 'most-viewed', label: 'MOST VIEWED' },
 ];
 
 const Explore = () => {
@@ -34,17 +34,21 @@ const Explore = () => {
   const observerRef = useRef(null);
 
   useEffect(() => {
-    setPage(1); setArtworks([]);
+    setPage(1);
+    setArtworks([]);
     fetchArtworks(1, true);
   }, [category, isForSale, sortBy, searchParamVal]);
 
-  useEffect(() => { setSearch(searchParamVal); }, [searchParamVal]);
+  useEffect(() => {
+    setSearch(searchParamVal);
+  }, [searchParamVal]);
 
   const fetchArtworks = async (pageNum, isNew = false) => {
     if (pageNum === 1) setLoading(true); else setLoadingMore(true);
     try {
       const q = [
-        `page=${pageNum}`, 'limit=12',
+        `page=${pageNum}`,
+        'limit=12',
         category && category !== 'All' ? `category=${encodeURIComponent(category)}` : '',
         isForSale ? 'isForSale=true' : '',
         searchParamVal ? `search=${encodeURIComponent(searchParamVal)}` : '',
@@ -60,7 +64,11 @@ const Explore = () => {
   useEffect(() => {
     if (loading || page >= totalPages) return;
     const obs = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && !loadingMore) { const n = page + 1; setPage(n); fetchArtworks(n, false); }
+      if (entries[0].isIntersecting && !loadingMore) {
+        const n = page + 1;
+        setPage(n);
+        fetchArtworks(n, false);
+      }
     }, { threshold: 1 });
     if (observerRef.current) obs.observe(observerRef.current);
     return () => { if (observerRef.current) obs.unobserve(observerRef.current); };
@@ -85,113 +93,121 @@ const Explore = () => {
 
   const activeFilters = [
     category && category !== 'All' && { label: category, clear: () => selectCat('All') },
-    isForSale && { label: 'For Sale', clear: toggleSale },
-    searchParamVal && { label: `"${searchParamVal}"`, clear: () => setSearchParams({ search: '', category, isForSale: isForSale.toString() }) },
+    isForSale && { label: 'FOR SALE', clear: toggleSale },
+    searchParamVal && { label: `"${searchParamVal.toUpperCase()}"`, clear: () => setSearchParams({ search: '', category, isForSale: isForSale.toString() }) },
   ].filter(Boolean);
 
   return (
-    <div className="page-content min-h-screen pt-24 pb-20" style={{ color: 'var(--text-1)' }}>
-      <div className="mx-auto max-w-7xl px-5 md:px-8">
+    <div className="page-content min-h-screen pt-24 pb-20" style={{ background: '#000000', color: '#ffffff' }}>
+      <div className="mx-auto max-w-screen-xl px-6 md:px-10">
 
         {/* Header */}
         <div className="mb-10">
           <motion.p
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-            className="label mb-4"
-          >The Gallery</motion.p>
+            className="overline mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            The Collection
+          </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}
-            className="font-display text-4xl md:text-5xl font-bold" style={{ color: 'var(--text-0)' }}
+            className="font-display text-5xl md:text-7xl font-bold" style={{ color: '#ffffff', letterSpacing: '0.02em' }}
           >
-            Explore <span className="text-teal-glow">Creations</span>
+            EXPLORE CREATIONS
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.14 }}
-            className="mt-3 text-sm" style={{ color: 'var(--text-3)' }}
+            className="mt-3 text-xs tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}
           >
-            Discover extraordinary artwork from independent artists worldwide.
+            Discover B&W imagery, physical paint medium, sketches, and photography.
           </motion.p>
         </div>
 
         <hr className="rule mb-8" />
 
-        {/* Filter bar */}
+        {/* Search / Filters Bar */}
         <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
           <form onSubmit={handleSearch} className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 pointer-events-none" style={{ color: 'var(--text-3)' }} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 pointer-events-none" style={{ color: 'rgba(255,255,255,0.3)' }} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search artworks…"
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none transition-all"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: 'var(--text-1)' }}
-              onFocus={e => { e.target.style.borderColor = 'rgba(0,217,255,0.4)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,217,255,0.05)'; }}
-              onBlur={e  => { e.target.style.borderColor = 'rgba(255,255,255,0.07)'; e.target.style.boxShadow = 'none'; }}
+              placeholder="SEARCH WORKS..."
+              className="w-full pl-9 pr-4 py-2.5 rounded-none text-xs outline-none transition-all"
+              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#ffffff' }}
+              onFocus={e => { e.target.style.borderColor = 'rgba(255,255,255,0.4)'; }}
+              onBlur={e  => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
             />
           </form>
 
           <div className="flex items-center gap-3 flex-wrap">
             <button onClick={toggleSale}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 text-xs font-semibold tracking-wider transition-all duration-200 uppercase"
               style={{
-                background: isForSale ? 'rgba(255,77,109,0.12)' : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${isForSale ? 'rgba(255,77,109,0.4)' : 'rgba(255,255,255,0.07)'}`,
-                color: isForSale ? '#ff8fa3' : 'var(--text-2)',
+                background: isForSale ? '#ffffff' : 'transparent',
+                border: '1px solid #ffffff',
+                color: isForSale ? '#000000' : '#ffffff',
+                borderRadius: '9999px'
               }}
             >
-              <ShoppingBag className="h-3.5 w-3.5" /> For Sale
+              <ShoppingBag className="h-3 w-3" /> FOR SALE
             </button>
 
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <Sliders className="h-3.5 w-3.5" style={{ color: 'var(--text-3)' }} />
+            <div className="flex items-center gap-2 px-3 py-2 text-xs"
+              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <Sliders className="h-3 w-3" style={{ color: 'rgba(255,255,255,0.4)' }} />
               <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-                className="bg-transparent text-xs font-semibold outline-none cursor-pointer"
-                style={{ color: 'var(--text-2)' }}>
-                {SORTS.map(s => <option key={s.value} value={s.value} style={{ background: '#080814' }}>{s.label}</option>)}
+                className="bg-transparent text-[10px] tracking-wider uppercase font-semibold outline-none cursor-pointer"
+                style={{ color: '#ffffff' }}
+              >
+                {SORTS.map(s => <option key={s.value} value={s.value} style={{ background: '#000000', color: '#ffffff' }}>{s.label}</option>)}
               </select>
             </div>
           </div>
         </div>
 
-        {/* Category pills */}
+        {/* Category Pills */}
         <div className="flex gap-2 overflow-x-auto pb-3 no-scrollbar mb-8">
           {CATEGORIES.map(cat => {
             const active = (cat === 'All' && !category) || category === cat;
             return (
               <button key={cat} onClick={() => selectCat(cat)}
-                className="whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 shrink-0"
+                className="whitespace-nowrap px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all duration-200 shrink-0"
                 style={{
-                  background: active ? 'linear-gradient(135deg,#00d9ff,#06b6d4)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${active ? 'transparent' : 'rgba(255,255,255,0.07)'}`,
-                  color: active ? '#030309' : 'var(--text-2)',
-                  boxShadow: active ? '0 4px 16px rgba(0,217,255,0.25)' : 'none',
+                  background: active ? '#ffffff' : 'transparent',
+                  border: '1px solid #ffffff',
+                  color: active ? '#000000' : 'rgba(255,255,255,0.5)',
+                  borderRadius: '9999px'
                 }}
-              >{cat}</button>
+              >
+                {cat}
+              </button>
             );
           })}
         </div>
 
-        {/* Active filter chips */}
+        {/* Active Filter Chips */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
             {activeFilters.map((f, i) => (
               <button key={i} onClick={f.clear}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
-                style={{ background: 'rgba(0,217,255,0.08)', border: '1px solid rgba(0,217,255,0.2)', color: '#67e8f9' }}>
+                className="flex items-center gap-1.5 px-3 py-1 rounded-none text-[9px] font-mono tracking-wider transition-all"
+                style={{ border: '1px solid rgba(255,255,255,0.3)', color: '#ffffff' }}>
                 {f.label}<X className="h-3 w-3" />
               </button>
             ))}
             <button onClick={() => { selectCat('All'); setIsForSale(false); setSearchParams({}); }}
-              className="text-[11px] font-medium transition-colors"
-              style={{ color: 'var(--text-3)' }}
-              onMouseEnter={e => e.currentTarget.style.color = 'var(--text-1)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
-            >Clear all</button>
+              className="font-mono text-[9px] tracking-wider transition-colors uppercase"
+              style={{ color: 'rgba(255,255,255,0.4)' }}
+              onMouseEnter={e => e.currentTarget.style.color = '#ffffff'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+            >
+              CLEAR ALL
+            </button>
           </div>
         )}
 
-        {/* Gallery */}
+        {/* Gallery Grid */}
         {loading ? (
           <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
             {Array.from({ length: 12 }).map((_, i) => (
@@ -200,30 +216,35 @@ const Explore = () => {
           </div>
         ) : artworks.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="py-28 text-center rounded-2xl mt-4"
-            style={{ border: '1px dashed rgba(0,217,255,0.1)' }}>
-            <p className="font-display text-xl font-bold mb-3" style={{ color: 'var(--text-0)' }}>No artworks found</p>
-            <p className="text-sm" style={{ color: 'var(--text-3)' }}>Adjust your filters or search term.</p>
+            className="py-28 text-center rounded-none mt-4"
+            style={{ border: '1px dashed rgba(255,255,255,0.1)' }}>
+            <p className="font-display text-2xl font-bold mb-3" style={{ color: '#ffffff' }}>NO ARTWORKS FOUND</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Try adjusting your filters or search term.</p>
             <button onClick={() => { selectCat('All'); setIsForSale(false); setSearchParams({}); }}
-              className="btn-primary mt-6">Reset Filters</button>
+              className="btn mt-6">
+              RESET FILTERS
+            </button>
           </motion.div>
         ) : (
           <>
             <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-              {artworks.map((art, i) => <ArtworkCard key={art._id} artwork={art} index={i} />)}
+              {artworks.map((art, i) => (
+                <ArtworkCard key={art._id} artwork={art} index={i} />
+              ))}
             </div>
             {page < totalPages && (
               <div ref={observerRef} className="mt-14 flex justify-center">
                 {loadingMore && (
                   <div className="flex items-center gap-3">
-                    <RefreshCw className="h-4 w-4 animate-spin" style={{ color: '#00d9ff' }} />
-                    <span className="text-xs" style={{ color: 'var(--text-3)' }}>Loading more…</span>
+                    <RefreshCw className="h-4 w-4 animate-spin" style={{ color: '#ffffff' }} />
+                    <span className="section-tag">LOADING MORE...</span>
                   </div>
                 )}
               </div>
             )}
           </>
         )}
+
       </div>
     </div>
   );

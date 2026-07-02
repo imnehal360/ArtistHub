@@ -6,7 +6,7 @@ import { useTheme } from '../context/ThemeContext.jsx';
 import API from '../services/api.js';
 import {
   Search, Bell, Mail, Upload, Menu, X,
-  LogOut, LayoutDashboard, User, Settings, Palette,
+  LogOut, LayoutDashboard, User, Settings,
   ChevronDown
 } from 'lucide-react';
 
@@ -25,20 +25,21 @@ const Navbar = () => {
   const [unreadCount,   setUnreadCount]   = useState(0);
   const [profileOpen,   setProfileOpen]   = useState(false);
   const [scrolled,      setScrolled]      = useState(false);
+  const [searchOpen,    setSearchOpen]    = useState(false);
 
   const searchRef  = useRef(null);
   const notifRef   = useRef(null);
   const profileRef = useRef(null);
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 12);
+    const fn = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
   useEffect(() => {
     const fn = (e) => {
-      if (searchRef.current  && !searchRef.current.contains(e.target))  setSuggestOpen(false);
+      if (searchRef.current  && !searchRef.current.contains(e.target))  { setSuggestOpen(false); setSearchOpen(false); }
       if (notifRef.current   && !notifRef.current.contains(e.target))   setNotifOpen(false);
       if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
     };
@@ -56,11 +57,11 @@ const Navbar = () => {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    const fetch = async () => {
+    const fn = async () => {
       try { const r = await API.get('/notifications'); setNotifications(r.data); setUnreadCount(r.data.filter(n=>!n.isRead).length); } catch {}
     };
-    fetch();
-    const id = setInterval(fetch, 20000);
+    fn();
+    const id = setInterval(fn, 20000);
     return () => clearInterval(id);
   }, [isAuthenticated]);
 
@@ -70,145 +71,114 @@ const Navbar = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) { navigate(`/explore?search=${searchQuery}`); setSuggestOpen(false); }
+    if (searchQuery.trim()) { navigate(`/explore?search=${searchQuery}`); setSuggestOpen(false); setSearchOpen(false); }
   };
 
-  const navLinks = [
-    { label: 'Explore', path: '/explore' },
-    { label: 'Artists', path: '/explore?sortBy=trending' },
-  ];
+  const isActive = (path) => location.pathname === path;
 
-  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path.split('?')[0]);
+  const navLinks = [
+    { label: 'Gallery',  path: '/explore' },
+    { label: 'Artists',  path: '/explore?sortBy=trending' },
+  ];
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-400"
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled
-          ? 'rgba(3,3,9,0.88)'
-          : 'rgba(3,3,9,0.35)',
-        backdropFilter: 'blur(28px) saturate(1.6)',
-        WebkitBackdropFilter: 'blur(28px) saturate(1.6)',
-        borderBottom: scrolled
-          ? '1px solid rgba(0,217,255,0.1)'
-          : '1px solid rgba(255,255,255,0.04)',
-        boxShadow: scrolled ? '0 4px 40px rgba(0,0,0,0.6), 0 0 60px rgba(0,217,255,0.04)' : 'none',
+        background: scrolled ? 'rgba(0,0,0,0.95)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(255,255,255,0.07)' : '1px solid transparent',
       }}
     >
-      {/* Teal top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] pointer-events-none"
-        style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,217,255,0.5) 30%, rgba(168,85,247,0.5) 70%, transparent 100%)' }} />
+      <div className="mx-auto max-w-screen-xl px-6 md:px-10">
+        <div className="flex h-16 items-center justify-between">
 
-      <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-8">
-        <div className="flex h-16 items-center justify-between gap-6">
-
-          {/* ── LOGO ───────────────────────────────────── */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-xl overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #00d9ff 0%, #06b6d4 100%)', boxShadow: '0 0 20px rgba(0,217,255,0.35)' }}>
-              <Palette className="h-4 w-4" style={{ color: '#030309' }} />
-            </div>
-            <span className="font-display text-lg font-bold tracking-tight" style={{ color: '#f0f0ff' }}>
-              Artist<span style={{ color: '#00d9ff', textShadow: '0 0 16px rgba(0,217,255,0.5)' }}>Hub</span>
+          {/* ── LOGO ─────────────────────────────────────── */}
+          <Link to="/" className="flex items-center gap-0 shrink-0">
+            <span className="font-display text-2xl leading-none tracking-widest" style={{ color: '#fff', fontSize: '1.5rem', letterSpacing: '0.12em' }}>
+              ARTIST<span style={{ color: 'rgba(255,255,255,0.45)' }}>HUB</span>
             </span>
           </Link>
 
-          {/* ── NAV LINKS ──────────────────────────────── */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* ── CENTER NAV (desktop) ─────────────────────── */}
+          <nav className="hidden md:flex items-center gap-8">
             {navLinks.map(l => (
               <Link
                 key={l.path}
                 to={l.path}
-                className="relative px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-                style={{ color: isActive(l.path) ? '#00d9ff' : 'var(--text-2)' }}
-                onMouseEnter={e => { if (!isActive(l.path)) e.currentTarget.style.color = 'var(--text-0)'; }}
-                onMouseLeave={e => { if (!isActive(l.path)) e.currentTarget.style.color = 'var(--text-2)'; }}
+                className="font-sans text-xs font-semibold tracking-[0.2em] uppercase transition-colors duration-200"
+                style={{ color: isActive(l.path) ? '#fff' : 'rgba(255,255,255,0.45)' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+                onMouseLeave={e => { if (!isActive(l.path)) e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; }}
               >
                 {l.label}
-                {isActive(l.path) && (
-                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full"
-                    style={{ background: '#00d9ff', boxShadow: '0 0 8px rgba(0,217,255,0.8)' }} />
-                )}
               </Link>
             ))}
           </nav>
 
-          {/* ── SEARCH ─────────────────────────────────── */}
-          <div ref={searchRef} className="relative hidden md:block flex-1 max-w-xs">
-            <form onSubmit={handleSearch}>
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 pointer-events-none"
-                  style={{ color: 'var(--text-3)' }} />
-                <input
-                  value={searchQuery}
-                  onChange={e => { setSearchQuery(e.target.value); setSuggestOpen(true); }}
-                  onFocus={e => {
-                    setSuggestOpen(true);
-                    e.target.style.borderColor = 'rgba(0,217,255,0.4)';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(0,217,255,0.06)';
-                    e.target.style.background = 'rgba(0,217,255,0.04)';
-                  }}
-                  onBlur={e => {
-                    e.target.style.borderColor = 'rgba(255,255,255,0.07)';
-                    e.target.style.boxShadow = 'none';
-                    e.target.style.background = 'rgba(255,255,255,0.04)';
-                  }}
-                  placeholder="Search artworks, artists…"
-                  className="w-full pl-9 pr-4 py-2 text-xs rounded-xl outline-none transition-all duration-200"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: 'var(--text-1)' }}
-                />
-              </div>
-            </form>
+          {/* ── RIGHT CONTROLS ───────────────────────────── */}
+          <div className="flex items-center gap-4">
 
-            <AnimatePresence>
-              {suggestOpen && suggestions.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }}
-                  className="absolute top-10 left-0 right-0 z-50 overflow-hidden rounded-xl"
-                  style={{ background: 'rgba(8,8,20,0.96)', border: '1px solid rgba(0,217,255,0.15)', backdropFilter: 'blur(20px)', boxShadow: '0 16px 48px rgba(0,0,0,0.8), 0 0 40px rgba(0,217,255,0.08)' }}
-                >
-                  {suggestions.map((s, i) => (
-                    <button key={i}
-                      onClick={() => { navigate(s.type === 'artist' ? `/artist/${s.username}` : `/artwork/${s.id}`); setSuggestOpen(false); setSearchQuery(''); }}
-                      className="flex w-full items-center justify-between px-4 py-2.5 text-left text-xs transition-colors"
-                      style={{ color: 'var(--text-2)', borderBottom: i < suggestions.length-1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.06)'; e.currentTarget.style.color = '#00d9ff'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-2)'; }}
-                    >
-                      <span style={{ color: 'var(--text-0)' }}>{s.text}</span>
-                      <span className="badge">{s.type}</span>
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+            {/* Search toggle */}
+            <div ref={searchRef} className="relative">
+              <button onClick={() => setSearchOpen(!searchOpen)} className="btn-icon">
+                {searchOpen ? <X className="h-3.5 w-3.5" /> : <Search className="h-3.5 w-3.5" />}
+              </button>
 
-          {/* ── RIGHT CONTROLS ─────────────────────────── */}
-          <div className="flex items-center gap-2">
+              <AnimatePresence>
+                {searchOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: '260px' }} exit={{ opacity: 0, width: 0 }}
+                    className="absolute right-10 top-1/2 -translate-y-1/2 overflow-hidden"
+                    style={{ transformOrigin: 'right' }}
+                  >
+                    <form onSubmit={handleSearch}>
+                      <input
+                        autoFocus
+                        value={searchQuery}
+                        onChange={e => { setSearchQuery(e.target.value); setSuggestOpen(true); }}
+                        placeholder="Search works, artists…"
+                        className="w-full input-field py-2 text-xs"
+                        style={{ borderRadius: 0 }}
+                      />
+                    </form>
+                    <AnimatePresence>
+                      {suggestOpen && suggestions.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                          className="absolute top-full left-0 right-0 z-50"
+                          style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderTop: 'none' }}
+                        >
+                          {suggestions.map((s, i) => (
+                            <button key={i}
+                              onClick={() => { navigate(s.type === 'artist' ? `/artist/${s.username}` : `/artwork/${s.id}`); setSuggestOpen(false); setSearchOpen(false); setSearchQuery(''); }}
+                              className="flex w-full items-center justify-between px-3 py-2 text-left text-xs transition-colors"
+                              style={{ color: 'rgba(255,255,255,0.6)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#fff'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
+                            >
+                              <span>{s.text}</span>
+                              <span className="section-tag ml-2">{s.type}</span>
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {isAuthenticated ? (
               <>
-                <Link to="/dashboard/messages" title="Messages"
-                  className="p-2 rounded-lg transition-colors"
-                  style={{ color: 'var(--text-3)' }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'var(--text-1)'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
-                >
-                  <Mail className="h-4 w-4" />
-                </Link>
-
                 {/* Notifications */}
                 <div ref={notifRef} className="relative">
-                  <button
-                    onClick={() => { setNotifOpen(!notifOpen); if (!notifOpen && unreadCount > 0) markRead(); }}
-                    className="relative p-2 rounded-lg transition-colors"
-                    style={{ color: unreadCount > 0 ? '#00d9ff' : 'var(--text-3)' }}
-                  >
-                    <Bell className="h-4 w-4" />
+                  <button className="btn-icon relative"
+                    onClick={() => { setNotifOpen(!notifOpen); if (!notifOpen && unreadCount > 0) markRead(); }}>
+                    <Bell className="h-3.5 w-3.5" />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center rounded-full text-[9px] font-bold"
-                        style={{ background: '#ff4d6d', color: '#fff', boxShadow: '0 0 10px rgba(255,77,109,0.5)' }}>
+                      <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 flex items-center justify-center text-[8px] font-bold"
+                        style={{ background: '#fff', color: '#000', borderRadius: '50%' }}>
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
                     )}
@@ -217,34 +187,29 @@ const Navbar = () => {
                   <AnimatePresence>
                     {notifOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                        className="absolute right-0 top-11 w-80 rounded-2xl overflow-hidden z-50"
-                        style={{ background: 'rgba(8,8,20,0.97)', border: '1px solid rgba(0,217,255,0.15)', backdropFilter: 'blur(24px)', boxShadow: '0 24px 64px rgba(0,0,0,0.9), 0 0 40px rgba(0,217,255,0.07)' }}
+                        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+                        className="absolute right-0 top-11 w-72 z-50"
+                        style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)' }}
                       >
-                        <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                          <h4 className="font-accent text-sm font-bold" style={{ color: 'var(--text-0)' }}>Notifications</h4>
-                          {notifications.length > 0 && (
-                            <span className="text-[10px] font-bold" style={{ color: '#00d9ff' }}>{unreadCount} new</span>
-                          )}
+                        <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                          <p className="overline">Notifications</p>
+                          {unreadCount > 0 && <span className="section-tag">{unreadCount} new</span>}
                         </div>
-                        <div className="max-h-72 overflow-y-auto">
+                        <div className="max-h-64 overflow-y-auto">
                           {notifications.length === 0 ? (
-                            <p className="px-4 py-8 text-center text-xs" style={{ color: 'var(--text-3)' }}>You're all caught up ✦</p>
+                            <p className="px-4 py-8 text-center section-tag">All caught up</p>
                           ) : notifications.map((n, i) => (
-                            <div key={n._id || i} className="flex gap-3 px-4 py-3 transition-colors"
-                              style={{ background: n.isRead ? 'transparent' : 'rgba(0,217,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                            <div key={n._id || i} className="flex gap-3 px-4 py-3"
+                              style={{ background: n.isRead ? 'transparent' : 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                               <img src={n.senderProfile?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${n.sender?.username}`}
-                                className="h-8 w-8 rounded-full object-cover shrink-0" alt="" style={{ background: 'rgba(255,255,255,0.06)' }} />
-                              <div className="min-w-0">
-                                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-2)' }}>
-                                  <span className="font-semibold" style={{ color: 'var(--text-0)' }}>@{n.sender?.username}</span>{' '}
-                                  {n.type === 'like' && 'liked your artwork'}
-                                  {n.type === 'comment' && 'commented on your work'}
-                                  {n.type === 'follow' && 'started following you'}
-                                  {n.type === 'message' && 'sent you a message'}
-                                </p>
-                                {n.artwork && <p className="text-[10px] mt-0.5" style={{ color: '#00d9ff' }}>{n.artwork.title}</p>}
-                              </div>
+                                className="h-7 w-7 object-cover shrink-0 bw" style={{ borderRadius: '50%' }} alt="" />
+                              <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                                <span style={{ color: '#fff' }}>@{n.sender?.username}</span>{' '}
+                                {n.type === 'like' && 'liked your artwork'}
+                                {n.type === 'comment' && 'commented on your work'}
+                                {n.type === 'follow' && 'started following you'}
+                                {n.type === 'message' && 'sent you a message'}
+                              </p>
                             </div>
                           ))}
                         </div>
@@ -253,71 +218,58 @@ const Navbar = () => {
                   </AnimatePresence>
                 </div>
 
-                {/* Upload CTA */}
+                {/* Upload */}
                 {isArtist && (
-                  <Link to="/dashboard/upload"
-                    className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200"
-                    style={{ background: 'linear-gradient(135deg,#00d9ff,#06b6d4)', color: '#030309', boxShadow: '0 4px 16px rgba(0,217,255,0.3)' }}
-                    onMouseEnter={e => e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,217,255,0.55)'}
-                    onMouseLeave={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,217,255,0.3)'}
-                  >
-                    <Upload className="h-3.5 w-3.5" />
-                    Upload
+                  <Link to="/dashboard/upload" className="hidden md:block btn-sm">
+                    <Upload className="h-3 w-3" /> Upload
                   </Link>
                 )}
 
                 {/* Profile */}
                 <div ref={profileRef} className="relative">
                   <button onClick={() => setProfileOpen(!profileOpen)}
-                    className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full transition-all duration-200"
-                    style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.04)' }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(0,217,255,0.3)'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
-                  >
+                    className="flex items-center gap-2.5 transition-opacity hover:opacity-70">
                     <img src={user.profile?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${user.username}`}
-                      className="h-7 w-7 rounded-full object-cover" alt="Avatar" />
-                    <span className="hidden md:block text-xs font-medium" style={{ color: 'var(--text-1)' }}>{user.username}</span>
-                    <ChevronDown className="hidden md:block h-3.5 w-3.5" style={{ color: 'var(--text-3)', transform: profileOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+                      className="h-7 w-7 object-cover bw" style={{ borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)' }} alt="" />
+                    <span className="hidden md:block font-sans text-xs font-medium tracking-wide" style={{ color: 'rgba(255,255,255,0.7)' }}>{user.username}</span>
+                    <ChevronDown className="hidden md:block h-3 w-3" style={{ color: 'rgba(255,255,255,0.4)', transform: profileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                   </button>
 
                   <AnimatePresence>
                     {profileOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                        className="absolute right-0 top-11 w-52 rounded-2xl overflow-hidden z-50"
-                        style={{ background: 'rgba(8,8,20,0.97)', border: '1px solid rgba(0,217,255,0.15)', backdropFilter: 'blur(24px)', boxShadow: '0 24px 64px rgba(0,0,0,0.9), 0 0 40px rgba(0,217,255,0.06)' }}
+                        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+                        className="absolute right-0 top-11 w-48 z-50"
+                        style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)' }}
                       >
-                        <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                          <p className="text-xs font-bold" style={{ color: 'var(--text-0)' }}>@{user.username}</p>
-                          <p className="text-[10px] capitalize mt-0.5" style={{ color: 'var(--text-3)' }}>{user.role}</p>
+                        <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                          <p className="text-xs font-semibold" style={{ color: '#fff' }}>@{user.username}</p>
+                          <p className="section-tag mt-0.5 capitalize">{user.role}</p>
                         </div>
-
                         {[
-                          isArtist && { icon: User, label: 'Public Profile', to: `/artist/${user.username}` },
-                          (isArtist || isAdmin) && { icon: LayoutDashboard, label: isAdmin ? 'Admin Panel' : 'Dashboard', to: isAdmin ? '/admin' : '/dashboard' },
+                          isArtist && { icon: User,          label: 'My Portfolio',  to: `/artist/${user.username}` },
+                          (isArtist || isAdmin) && { icon: LayoutDashboard, label: isAdmin ? 'Admin' : 'Dashboard', to: isAdmin ? '/admin' : '/dashboard' },
                           { icon: Settings, label: 'Settings', to: '/dashboard/settings' },
                         ].filter(Boolean).map((item, i) => {
                           const Icon = item.icon;
                           return (
                             <Link key={i} to={item.to} onClick={() => setProfileOpen(false)}
-                              className="flex items-center gap-3 px-4 py-2.5 text-xs transition-colors"
-                              style={{ color: 'var(--text-2)' }}
-                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.05)'; e.currentTarget.style.color = '#00d9ff'; }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-2)'; }}
+                              className="flex items-center gap-3 px-4 py-2.5 text-xs font-medium transition-colors"
+                              style={{ color: 'rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#fff'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
                             >
-                              <Icon className="h-3.5 w-3.5" />
-                              {item.label}
+                              <Icon className="h-3 w-3" />{item.label}
                             </Link>
                           );
                         })}
-
                         <button onClick={() => { logout(); setProfileOpen(false); }}
-                          className="flex w-full items-center gap-3 px-4 py-2.5 text-xs transition-colors"
-                          style={{ color: '#ff4d6d', borderTop: '1px solid rgba(255,255,255,0.05)' }}
-                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,77,109,0.06)'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          className="flex w-full items-center gap-3 px-4 py-2.5 text-xs font-medium transition-colors"
+                          style={{ color: 'rgba(255,255,255,0.35)' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#fff'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; }}
                         >
-                          <LogOut className="h-3.5 w-3.5" /> Logout
+                          <LogOut className="h-3 w-3" /> Logout
                         </button>
                       </motion.div>
                     )}
@@ -325,25 +277,20 @@ const Navbar = () => {
                 </div>
               </>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <Link to="/login"
-                  className="px-4 py-2 text-xs font-medium rounded-lg transition-colors"
-                  style={{ color: 'var(--text-2)' }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'var(--text-0)'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'var(--text-2)'}
-                >Sign In</Link>
-                <Link to="/register"
-                  className="px-4 py-2 text-xs font-bold rounded-lg transition-all"
-                  style={{ background: 'linear-gradient(135deg,#00d9ff,#06b6d4)', color: '#030309', boxShadow: '0 2px 12px rgba(0,217,255,0.3)' }}
-                  onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,217,255,0.55)'}
-                  onMouseLeave={e => e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,217,255,0.3)'}
-                >Get Started</Link>
+                  className="font-sans text-xs font-semibold tracking-[0.15em] uppercase transition-colors"
+                  style={{ color: 'rgba(255,255,255,0.45)' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.45)'}
+                >Login</Link>
+                <Link to="/register" className="btn-sm">Join</Link>
               </div>
             )}
 
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-lg md:hidden"
-              style={{ color: 'var(--text-2)' }}>
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {/* Hamburger */}
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden btn-icon">
+              {mobileOpen ? <X className="h-3.5 w-3.5" /> : <Menu className="h-3.5 w-3.5" />}
             </button>
           </div>
         </div>
@@ -355,13 +302,13 @@ const Navbar = () => {
           <motion.div
             initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
             className="md:hidden overflow-hidden"
-            style={{ background: 'rgba(3,3,9,0.97)', borderTop: '1px solid rgba(0,217,255,0.1)' }}
+            style={{ background: '#000', borderTop: '1px solid rgba(255,255,255,0.07)' }}
           >
-            <div className="px-5 py-4 flex flex-col gap-1">
+            <div className="px-6 py-5 flex flex-col gap-3">
               {navLinks.map(l => (
                 <Link key={l.path} to={l.path} onClick={() => setMobileOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-sm font-medium"
-                  style={{ color: isActive(l.path) ? '#00d9ff' : 'var(--text-2)', background: isActive(l.path) ? 'rgba(0,217,255,0.06)' : 'transparent' }}>
+                  className="font-sans text-xs font-semibold tracking-[0.2em] uppercase py-2"
+                  style={{ color: isActive(l.path) ? '#fff' : 'rgba(255,255,255,0.4)' }}>
                   {l.label}
                 </Link>
               ))}
